@@ -9,6 +9,8 @@ class BrowserPlatform : public Nix::Platform {
 public:
     BrowserPlatform();
 
+    uint64_t capabilities() { return MediaElement; }
+
     // Audio --------------------------------------------------------------
     virtual float audioHardwareSampleRate() { return 44100; }
     virtual size_t audioHardwareBufferSize() { return 128; }
@@ -33,6 +35,9 @@ public:
     // FFTFrame
     virtual Nix::FFTFrame* createFFTFrame(unsigned fftsize);
     virtual Nix::FFTFrame* createFFTFrame(const Nix::FFTFrame* frame);
+
+    // Media player
+    virtual Nix::MediaPlayer* createMediaPlayer(Nix::MediaPlayerClient*);
 private:
     // Gamepad
     void initializeGamepadController();
