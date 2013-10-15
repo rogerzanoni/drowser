@@ -150,7 +150,7 @@ void MediaPlayer::onGstBusMessage(GstBus*, GstMessage* msg, MediaPlayer* self)
 
 bool MediaPlayer::createPlayBin()
 {
-    assert(m_playBin);
+    assert(!m_playBin);
 
     m_playBin = gst_element_factory_make("playbin", "play");
     if (!m_playBin)
