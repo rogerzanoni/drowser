@@ -28,6 +28,7 @@
 
 #include <gst/audio/streamvolume.h>
 #include <cassert>
+#include <cmath>
 #include <cstdio>
 
 // GstPlayFlags flags from playbin. It is the policy of GStreamer to
@@ -56,6 +57,8 @@ MediaPlayer::MediaPlayer(Nix::MediaPlayerClient* client)
     : Nix::MediaPlayer(client)
     , m_playBin(nullptr)
     , m_paused(true)
+    , m_seeking(false)
+    , m_rate(1.0f)
 {
 }
 
@@ -101,9 +104,57 @@ float MediaPlayer::currentTime() const
     return 0;
 }
 
-void MediaPlayer::seek(float)
+void MediaPlayer::seek(float time)
 {
+    if (!m_playBin)
+        return;
 
+    if (time == currentTime())
+        return;
+
+    //TODO: check if is a live stream and return
+
+    m_seekTime = time;
+
+    if (m_seeking) {
+        m_pendingSeek = true;
+        return;
+    }
+
+    GstState state;
+    gst_element_get_state(m_playBin, &state, 0, 0);
+    if (state != GST_STATE_PAUSED && state != GST_STATE_PLAYING)
+        return;
+
+    float seconds;
+    float microSeconds = modff(time, &seconds) * 1000000.0f;
+    GTimeVal timeValue;
+    timeValue.tv_sec = static_cast<glong>(seconds);
+    timeValue.tv_usec = static_cast<glong>(roundf(microSeconds / 10000.0f) * 10000.0f);
+
+    if (!gst_element_seek(m_playBin, m_rate, GST_FORMAT_TIME, static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE),
+                          GST_SEEK_TYPE_SET, GST_TIMEVAL_TO_TIME(timeValue), GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE)) {
+        return;
+    }
+
+    m_seeking = true;
+}
+
+bool MediaPlayer::seeking() const
+{
+    return m_seeking;
+}
+
+float MediaPlayer::maxTimeSeekable() const
+{
+    //TODO: check if its a live stream
+
+    return duration();
+}
+
+void MediaPlayer::setRate(float rate)
+{
+    m_rate = rate;
 }
 
 void MediaPlayer::setVolume(float volume)
@@ -178,6 +229,9 @@ void MediaPlayer::onGstBusMessage(GstBus*, GstMessage* msg, MediaPlayer* self)
     case GST_MESSAGE_DURATION_CHANGED:
         self->m_playerClient->durationChanged();
         break;
+    case GST_MESSAGE_ASYNC_DONE:
+        self->asyncDone();
+        break;
     default:
         break;
     }
@@ -231,4 +285,18 @@ void MediaPlayer::setDownloadBuffering()
     GstPlayFlags flags;
     g_object_get(m_playBin, "flags", &flags, NULL);
     g_object_set(m_playBin, "flags", flags | GST_PLAY_FLAG_DOWNLOAD, NULL);
+}
+
+void MediaPlayer::asyncDone()
+{
+    GstState state;
+    GstStateChangeReturn result = gst_element_get_state(m_playBin, &state, 0, 0);
+    if (result == GST_STATE_CHANGE_SUCCESS && (state == GST_STATE_PAUSED || state == GST_STATE_PLAYING)) {
+        m_seeking = false;
+
+        if (m_pendingSeek) {
+            m_pendingSeek = false;
+            seek(m_seekTime);
+        }
+    }
 }
