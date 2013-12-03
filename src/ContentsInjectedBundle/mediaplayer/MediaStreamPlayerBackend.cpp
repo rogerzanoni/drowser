@@ -32,6 +32,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 #include <limits>
 
 MediaStreamPlayerBackend::MediaStreamPlayerBackend(Nix::MediaPlayerClient* client, Nix::MediaStream* stream)
@@ -248,11 +249,16 @@ bool MediaStreamPlayerBackend::connectToGSTLiveStream(Nix::MediaStream* mediaStr
         if (!source->enabled())
             continue;
         if (source->type() == Nix::MediaStreamSource::Audio) {
-            if (cpu.connectToSource(source->id(), m_audioSinkBin)) {
-                m_audioSourceId = source->id();
+            // FIXME: check why we need a strdup here - calling without making a copy will result in
+            // garbage in connectToSouce
+            char *sourceId = strdup(source->id());
+            if (cpu.connectToSource(sourceId, m_audioSinkBin)) {
+                m_audioSourceId = sourceId;
                 source->addObserver(this);
+                free(sourceId);
                 break;
             }
+            free(sourceId);
         }
     }
 
