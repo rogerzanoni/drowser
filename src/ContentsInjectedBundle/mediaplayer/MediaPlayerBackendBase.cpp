@@ -31,8 +31,6 @@ MediaPlayerBackendBase::MediaPlayerBackendBase(Nix::MediaPlayerClient* client, b
     : MediaPlayerBackend(client)
     , m_paused(true)
     , m_isLive(isLive)
-    , m_readyState(Nix::MediaPlayerClient::HaveNothing)
-    , m_networkState(Nix::MediaPlayerClient::Empty)
 {
 }
 
@@ -65,22 +63,6 @@ void MediaPlayerBackendBase::setMuted(bool mute)
 bool MediaPlayerBackendBase::isLiveStream() const
 {
     return m_isLive;
-}
-
-void MediaPlayerBackendBase::setReadyState(Nix::MediaPlayerClient::ReadyState readyState)
-{
-    if (m_readyState == readyState)
-        return;
-    m_readyState = readyState;
-    m_playerClient->readyStateChanged(m_readyState);
-}
-
-void MediaPlayerBackendBase::setNetworkState(Nix::MediaPlayerClient::NetworkState networkState)
-{
-    if (m_networkState == networkState)
-        return;
-    m_networkState = networkState;
-    m_playerClient->networkStateChanged(m_networkState);
 }
 
 void MediaPlayerBackendBase::onGstBusMessage(GstBus* bus, GstMessage* msg, MediaPlayerBackendBase* backend)

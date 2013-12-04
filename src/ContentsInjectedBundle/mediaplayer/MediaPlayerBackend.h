@@ -31,7 +31,7 @@
 class MediaPlayerBackend
 {
 public:
-    MediaPlayerBackend(Nix::MediaPlayerClient* client): m_playerClient(client) { }
+    MediaPlayerBackend(Nix::MediaPlayerClient* client);
     virtual ~MediaPlayerBackend() { }
 
     virtual void load() = 0;
@@ -49,7 +49,12 @@ public:
     virtual bool isPaused() const = 0;
 
 protected:
+    virtual void setReadyState(Nix::MediaPlayerClient::ReadyState readyState);
+    virtual void setNetworkState(Nix::MediaPlayerClient::NetworkState readyState);
+
     Nix::MediaPlayerClient *m_playerClient;
+    Nix::MediaPlayerClient::ReadyState m_readyState;
+    Nix::MediaPlayerClient::NetworkState m_networkState;
 };
 
 #endif // MediaPlayerBackend_h

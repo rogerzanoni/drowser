@@ -63,15 +63,10 @@ public:
     virtual bool isPaused() const override;
 
     virtual GstElement* pipeline() const = 0;
-    virtual void setReadyState(Nix::MediaPlayerClient::ReadyState readyState);
-    virtual void setNetworkState(Nix::MediaPlayerClient::NetworkState readyState);
 
 protected:
     bool m_paused;
     bool m_isLive;
-
-    Nix::MediaPlayerClient::ReadyState m_readyState;
-    Nix::MediaPlayerClient::NetworkState m_networkState;
 
     static void onGstBusMessage(GstBus*, GstMessage*, MediaPlayerBackendBase* backend);
     virtual bool createAudioSink() { return false; }

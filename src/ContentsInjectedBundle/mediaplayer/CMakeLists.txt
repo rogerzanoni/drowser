@@ -22,6 +22,7 @@ link_directories(
 
 set(mediaplayer_SOURCES
   MediaPlayer.cpp
+  MediaPlayerBackend.cpp
   MediaPlayerBackendBase.cpp
   DefaultMediaPlayerBackend.cpp
   MediaStreamPlayerBackend.cpp
