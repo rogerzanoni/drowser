@@ -45,7 +45,7 @@ MediaStreamSourceGStreamer(const std::string& id, const std::string& name, const
     , m_device(device)
     {
         LOG(Media, "'%s' '%s'", m_factoryKey.c_str(), m_device.c_str());
-        LOG(Media, "id '%s'", this->id());
+        LOG(Media, "id '%s'", this->id().c_str());
     }
 
     virtual ~MediaStreamSourceGStreamer()

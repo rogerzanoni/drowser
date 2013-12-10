@@ -224,7 +224,7 @@ GstElementFactory* MediaStreamCenterGStreamer::storedElementFactory(const string
 
 string MediaStreamCenterGStreamer::storeSourceInfo(MediaStreamSourceGStreamer* source)
 {
-    string id = g_strdup(source->id());
+    string id = source->id();
     string deviceString = getDeviceStringFromDeviceIdString(id);
     string factoryString = getFactoryNameFromDeviceIdString(id);
 

@@ -60,7 +60,7 @@ Nix::MediaStream MediaStreamCenter::createMediaStream(Nix::MediaConstraints& aud
         Nix::MediaStreamSource* audioSource = m_impl->firstSource(Nix::MediaStreamSource::Audio);
 
         assert(audioSource != nullptr);
-        LOG(Media, "%s got audio source id='%s'", __PRETTY_FUNCTION__, audioSource->id());
+        LOG(Media, "%s got audio source id='%s'", __PRETTY_FUNCTION__, audioSource->id().c_str());
 
         audioSources.push_back(audioSource);
     }
